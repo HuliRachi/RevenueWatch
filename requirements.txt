@@ -1,2 +1,2 @@
-soda-core-postgres==3.3.14
+soda-core-postgres==3.3.14 # for quality checks
 pytest==8.3.3
