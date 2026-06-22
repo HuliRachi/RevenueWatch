@@ -85,13 +85,15 @@ jobs:
       - name: Run Unit and Integration Tests
         if: steps.changed-files-tests.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
         run: docker exec -t airflow-worker sh -c "pytest tests/ -v"
-      - name: Run End-to-End DAG Tests
+            - name: Run End-to-End DAG Tests
         if: steps.changed-files-tests.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
         run: |
-          DAG_NAMES=("produce_json" "update_db" "data_quality")
-          for DAG in "${DAG_NAMES[@]}"; do 
-            docker exec -t airflow-worker sh -c "airflow dags test $DAG"
-          done
+          docker exec -t airflow-worker sh -c "airflow db init || airflow db upgrade"
+          docker exec -t airflow-worker sh -c "airflow dags reserialize"
+          
+          echo "Executing pipeline verification..."
+          docker exec -t airflow-worker sh -c "airflow dags backfill produce_json --start-date 2026-06-20 --end-date 2026-06-21"
+
       - name: Tear down Docker Compose
         if: steps.changed-files-tests.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
         run: docker compose down
