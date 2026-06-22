@@ -9,8 +9,10 @@ from api.video_stats import (
     extract_video_data,
     save_to_json,
 )
+
 from datawarehouse.dwh import staging_table, core_table
 from dataquality.soda import yt_elt_data_quality
+
 
 local_tz = pendulum.timezone("Africa/Johannesburg")
 
